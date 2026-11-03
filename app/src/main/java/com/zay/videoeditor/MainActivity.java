@@ -364,4 +364,19 @@ public class MainActivity extends Activity {
             durs.add(durationOf(u));
         }
         if (selected < 0) selectClip(0);
-        else refreshClips
+        else refreshClips();
+    }
+
+    @Override protected void onPause() {
+        super.onPause();
+        if (videoView != null && videoView.isPlaying()) {
+            videoView.pause();
+            playBtn.setText("▶");
+        }
+    }
+
+    @Override protected void onDestroy() {
+        handler.removeCallbacks(ticker);
+        super.onDestroy();
+    }
+}
