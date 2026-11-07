@@ -1,35 +1,29 @@
-name: Build ZAY VIDEO EDITOR APK
-
+name: Build APK
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
+      - uses: actions/checkout@v4
+      - name: Buka zip proyek
+        run: unzip -qo "$(ls -t ZAY-Project*.zip | head -n 1)"
+      - name: Versi
+        run: grep -m1 versionName ZayVideoEditor/app/build.gradle.kts | sed 's/^ */Versi yang dibangun: /' >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
-
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
+          java-version: 17
+      - name: Terima lisensi SDK
+        run: yes | "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses || true
+      - uses: gradle/actions/setup-gradle@v4
         with:
-          gradle-version: '8.7'
-
-      - name: Build APK
-        run: gradle assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v4
+          gradle-version: 8.9
+      - name: Build
+        run: gradle assembleDebug --stacktrace
+        working-directory: ZayVideoEditor
+      - uses: actions/upload-artifact@v4
         with:
-          name: ZAY-VIDEO-EDITOR-APK
-          path: app/build/outputs/apk/debug/*.apk
+          name: ZAY-Video-Editor-debug-apk
+          path: ZayVideoEditor/app/build/outputs/apk/debug/*.apk
+          if-no-files-found: error
